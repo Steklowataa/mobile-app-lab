@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/favorites_grid"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/inner_margin"
+    android:useDefaultMargins="true"
+    android:columnCount="3">
+
+    <!-- Pierwszy przycisk -->
+    <Button
+        android:id="@+id/main_6_6_board"
+        android:layout_rowWeight="1"
+        android:layout_columnWeight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:pointerIcon="context_menu"
+        android:text="6 x 6"
+        android:onClick="onClickBoardSize"
+        android:textSize="34sp"
+        android:tag="6 6"
+        app:icon="@drawable/baseline_rocket_launch_24"
+        app:iconGravity="textTop"
+        app:iconPadding="@dimen/icon_padding"
+        app:iconSize="48dp"/>
+
+    <!-- Drugi przycisk -->
+    <Button
+        android:id="@+id/main_8_8_board"
+        android:layout_rowWeight="1"
+        android:layout_columnWeight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="8 x 8"
+        android:onClick="onClickBoardSize"
+        android:tag="8 8"
+        android:textSize="34sp"
+        app:icon="@drawable/baseline_rocket_launch_24"
+        app:iconGravity="textTop"
+        app:iconPadding="@dimen/icon_padding"
+        app:iconSize="48dp" />
+
+    <!-- Trzeci element - niewidoczny Space -->
+    <Space
+        android:layout_width="wrap_content"
+        android:minWidth="@dimen/inner_margin"
+        android:layout_height="wrap_content" />
+
+    <!-- Kolejny wiersz przycisków -->
+    <Button
+        android:id="@+id/main_10_10_board"
+        android:layout_rowWeight="1"
+        android:layout_columnWeight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:onClick="onClickBoardSize"
+        android:text="10 x 10"
+        android:tag="10 10"
+        android:textSize="34sp"
+        app:icon="@drawable/baseline_rocket_launch_24"
+        app:iconGravity="textTop"
+        app:iconPadding="@dimen/icon_padding"
+        app:iconSize="48dp" />
+
+    <Button
+        android:id="@+id/main_12_12_board"
+        android:layout_rowWeight="1"
+        android:layout_columnWeight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="12 x 12"
+        android:onClick="onClickBoardSize"
+        android:tag="12 12"
+        android:textSize="34sp"
+        app:icon="@drawable/baseline_rocket_launch_24"
+        app:iconGravity="textTop"
+        app:iconPadding="@dimen/icon_padding"
+        app:iconSize="48dp" />
+
+    <Space
+        android:layout_width="wrap_content"
+        android:minWidth="@dimen/inner_margin"
+        android:layout_height="wrap_content" />
+
+</GridLayout>
