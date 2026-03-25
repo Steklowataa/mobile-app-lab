@@ -22,7 +22,6 @@ class Lab2Activity : AppCompatActivity() {
         intent.putExtra("rows", rows)
         intent.putExtra("columns", columns)
 
-//        Toast.makeText(this, "rows: $rows, columns: $columns", Toast.LENGTH_SHORT).show()
         startActivity(intent)
 
     }
