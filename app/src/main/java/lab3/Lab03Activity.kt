@@ -1,48 +1,83 @@
 package lab3
 
-import android.animation.ObjectAnimator
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.GridLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import pl.wsei.pam.lab01.R
-import java.util.Timer
-import kotlin.concurrent.schedule
 
 class Lab03Activity : AppCompatActivity() {
-    lateinit var completionPlayer: MediaPlayer
-    lateinit var negativePLayer: MediaPlayer
+    private lateinit var completionPlayer: MediaPlayer
+    private lateinit var negativePlayer: MediaPlayer
     private val animation = MemoryAnimation()
     private lateinit var mBoard: GridLayout
     private lateinit var mBoardModel: MemoryBoardView
 
+    // Zmienna sterująca dźwiękiem
+    private var isSound: Boolean = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lab03)
-
+        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.my_toolbar)
+        setSupportActionBar(toolbar)
         mBoard = findViewById(R.id.board)
 
         if (savedInstanceState != null) {
-            // Odtwarzanie po obrocie
             val rows = savedInstanceState.getInt("rows")
             val cols = savedInstanceState.getInt("cols")
             val icons = savedInstanceState.getIntArray("icons")
             val revealed = savedInstanceState.getBooleanArray("revealed")
+            // Odzyskujemy też stan dźwięku po obrocie
+            isSound = savedInstanceState.getBoolean("is_sound", true)
 
             mBoardModel = MemoryBoardView(mBoard, cols, rows, icons)
-
             if (revealed != null) {
                 mBoardModel.setRevealedStates(revealed)
             }
         } else {
-            // Nowa gra
             val rows = intent.getIntExtra("rows", 3)
             val columns = intent.getIntExtra("columns", 3)
             mBoardModel = MemoryBoardView(mBoard, columns, rows)
         }
 
         setupGameListener()
+    }
+
+    // Tworzenie menu w górnym pasku
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.board_activity_menu, menu)
+
+        // Upewniamy się, że ikona w menu pasuje do stanu isSound (ważne po obrocie ekranu)
+        val soundItem = menu.findItem(R.id.board_activity_sound)
+        if (isSound) {
+            soundItem.setIcon(R.drawable.glosnik)
+        } else {
+            soundItem.setIcon(R.drawable.glosnik_off)
+        }
+        return true
+    }
+
+    // Obsługa kliknięcia w ikonę głośnika
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.board_activity_sound) {
+            if (isSound) {
+                Toast.makeText(this, "Sound turned off", Toast.LENGTH_SHORT).show()
+                item.setIcon(R.drawable.glosnik_off)
+                isSound = false
+            } else {
+                Toast.makeText(this, "Sound turned on", Toast.LENGTH_SHORT).show()
+                item.setIcon(R.drawable.glosnik)
+                isSound = true
+            }
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun setupGameListener() {
@@ -56,16 +91,21 @@ class Lab03Activity : AppCompatActivity() {
                 }
 
                 GameStates.Match -> {
+                    // Sprawdzamy flagę isSound przed odtworzeniem
+                    if (isSound) playSound(completionPlayer)
+
                     e.tiles.forEach { tile ->
                         tile.revealed = true
                         animation.animateMatch(tile.button) {
                             mBoard.isEnabled = true
-                            completionPlayer.start()
                         }
                     }
                 }
 
                 GameStates.NoMatch -> {
+                    // Sprawdzamy flagę isSound przed odtworzeniem
+                    if (isSound) playSound(negativePlayer)
+
                     e.tiles.forEach { tile ->
                         tile.revealed = true
                         animation.animateNoMatch(tile.button) {
@@ -82,23 +122,38 @@ class Lab03Activity : AppCompatActivity() {
             }
         }
     }
-    override protected fun onResume() {
+
+    private fun playSound(player: MediaPlayer) {
+        try {
+            if (player.isPlaying) {
+                player.pause()
+                player.seekTo(0)
+            }
+            player.start()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun onResume() {
         super.onResume()
         completionPlayer = MediaPlayer.create(applicationContext, R.raw.completion)
-        negativePLayer = MediaPlayer.create(applicationContext, R.raw.negative_guitar)
+        negativePlayer = MediaPlayer.create(applicationContext, R.raw.negative_guitar)
     }
 
-
-    override protected fun onPause() {
-        super.onPause();
+    override fun onPause() {
+        super.onPause()
         completionPlayer.release()
-        negativePLayer.release()
+        negativePlayer.release()
     }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("rows", mBoard.rowCount)
         outState.putInt("cols", mBoard.columnCount)
         outState.putIntArray("icons", mBoardModel.getIcons())
         outState.putBooleanArray("revealed", mBoardModel.getRevealedStates())
+        // Zapisujemy stan wyciszenia
+        outState.putBoolean("is_sound", isSound)
     }
 }

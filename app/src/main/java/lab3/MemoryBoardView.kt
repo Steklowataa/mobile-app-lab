@@ -11,12 +11,10 @@ class MemoryBoardView(
     private val gridLayout: GridLayout,
     private val cols: Int,
     private val rows: Int,
-    predefinedIcons: IntArray? = null // Nowy parametr: opcjonalna lista ikon
+    predefinedIcons: IntArray? = null
 ) {
     private val tiles: MutableMap<String, Tile> = mutableMapOf()
     private val deckResource: Int = R.drawable.rounded_10k_24
-
-    // Lista ikon, które faktycznie wylądowały na planszy
     private val boardIcons: MutableList<Int> = mutableListOf()
 
     private val icons: List<Int> = listOf(
@@ -72,9 +70,6 @@ class MemoryBoardView(
 
     init {
         val totalTiles = cols * rows
-
-        // LOGIKA: Jeśli mamy gotowe ikony (po obrocie), używamy ich.
-        // Jeśli nie (nowa gra), losujemy i tasujemy.
         if (predefinedIcons != null && predefinedIcons.size == totalTiles) {
             boardIcons.addAll(predefinedIcons.toList())
         } else {
@@ -112,7 +107,7 @@ class MemoryBoardView(
 
     private fun onClickTile(v: View) {
         val tile = tiles[v.tag.toString()] ?: return
-        if (tile.revealed) return // Blokada klikania w odkryte
+        if (tile.revealed) return
 
         matchedPair.push(tile)
         val state = logic.process { tile.tileResource }
@@ -127,15 +122,12 @@ class MemoryBoardView(
         onGameChangeStateListener = listener
     }
 
-    // Pobiera aktualny układ ikon (do zapisu)
     fun getIcons(): IntArray = boardIcons.toIntArray()
 
-    // Pobiera informację, które karty są odkryte (do zapisu)
     fun getRevealedStates(): BooleanArray {
         return tiles.values.map { it.revealed }.toBooleanArray()
     }
 
-    // Przywraca stan odkrycia kart (po obrocie)
     fun setRevealedStates(states: BooleanArray) {
         tiles.values.forEachIndexed { index, tile ->
             if (index < states.size) {
