@@ -1,4 +1,4 @@
-package lab3
+package pl.oleksandra.pam.lab3
 
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -8,7 +8,10 @@ import android.view.MenuItem
 import android.widget.GridLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import pl.wsei.pam.lab01.R
+import lab3.MemoryAnimation
+import lab3.MemoryBoardView
+import lab3.GameStates
+import pl.oleksandra.pam.lab06.R
 
 class Lab03Activity : AppCompatActivity() {
     private lateinit var completionPlayer: MediaPlayer

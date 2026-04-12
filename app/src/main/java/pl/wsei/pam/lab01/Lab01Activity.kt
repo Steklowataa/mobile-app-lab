@@ -1,4 +1,4 @@
-package pl.wsei.pam.lab01
+package pl.oleksandra.lab1
 
 import android.os.Bundle
 import android.widget.Button
@@ -8,7 +8,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toolbar.LayoutParams
 import androidx.appcompat.app.AppCompatActivity
-
+import pl.oleksandra.pam.lab06.R
 class Lab01Activity : AppCompatActivity() {
     lateinit var mLayout: LinearLayout
     lateinit var mTitle: TextView

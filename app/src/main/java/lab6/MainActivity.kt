@@ -3,12 +3,11 @@ package pl.wsei.pam.lab06
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -18,41 +17,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import java.time.Instant
+import kotlinx.coroutines.launch
+import pl.wsei.pam.lab06.data.*
 import java.time.LocalDate
-import java.time.ZoneId
 
-enum class Priority {
-    High, Medium, Low
-}
+// --- MODELE ---
+
+enum class Priority { High, Medium, Low }
 
 data class TodoTask(
+    val id: Int = 0,
     val title: String,
     val deadline: LocalDate,
     val isDone: Boolean,
     val priority: Priority
 )
 
-fun todoTasks(): List<TodoTask> {
-    return listOf(
-        TodoTask("Programming", LocalDate.of(2024, 4, 18), false, Priority.Low),
-        TodoTask("Teaching", LocalDate.of(2024, 5, 12), false, Priority.High),
-        TodoTask("Learning", LocalDate.of(2024, 6, 28), true, Priority.Low),
-        TodoTask("Cooking", LocalDate.of(2024, 8, 18), false, Priority.Medium),
-    )
-}
-
-@Composable
-fun Lab06Theme(content: @Composable () -> Unit) {
-    MaterialTheme(content = content)
-}
+// --- AKTYWNOŚĆ ---
 
 class Lab06Activity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,13 +60,21 @@ class Lab06Activity : ComponentActivity() {
     }
 }
 
+// --- KOMPONENTY UI ---
+
+@Composable
+fun Lab06Theme(content: @Composable () -> Unit) {
+    MaterialTheme(content = content)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTopBar(
     navController: NavController,
     title: String,
     showBackIcon: Boolean,
-    route: String
+    route: String,
+    onSaveClick: () -> Unit = {}
 ) {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -87,281 +85,209 @@ fun AppTopBar(
         navigationIcon = {
             if (showBackIcon) {
                 IconButton(onClick = { navController.navigate(route) }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
-                    )
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
             }
         },
         actions = {
-            if (route != "form") {
-                OutlinedButton(
-                    onClick = { navController.navigate("list") }
-                )
-                {
-                    Text(
-                        text = "Zapisz",
-                        fontSize = 18.sp
-                    )
+            if (route != "form") { // Logika: jeśli JESTEŚMY w formularzu (route prowadzi do listy)
+                OutlinedButton(onClick = onSaveClick) {
+                    Text(text = "Zapisz", fontSize = 18.sp)
                 }
             } else {
-                IconButton(onClick = { }) {
-                    Icon(imageVector = Icons.Default.Settings, contentDescription = "")
-                }
-                IconButton(onClick = {  }) {
-                    Icon(imageVector = Icons.Default.Home, contentDescription = "")
-                }
+                IconButton(onClick = { }) { Icon(Icons.Default.Settings, "") }
+                IconButton(onClick = { }) { Icon(Icons.Default.Home, "") }
             }
         }
     )
 }
 
 @Composable
-fun ListItem(item: TodoTask, modifier: Modifier = Modifier) {
+fun TaskCard(task: TodoTask) {
     ElevatedCard(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
-        )
+            .padding(vertical = 4.dp, horizontal = 12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "Tytuł", style = MaterialTheme.typography.labelSmall)
-                Text(text = "Deadline", style = MaterialTheme.typography.labelSmall)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(task.title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                Text("Termin: ${task.deadline}", style = MaterialTheme.typography.bodyMedium)
+                SuggestionChip(onClick = {}, label = { Text(task.priority.name) }, enabled = false)
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.headlineMedium
-                )
-                Text(
-                    text = item.deadline.toString(),
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Priorytet", style = MaterialTheme.typography.labelSmall)
-            Text(
-                text = item.priority.name,
-                style = MaterialTheme.typography.headlineMedium
+            Icon(
+                imageVector = if (task.isDone) Icons.Default.CheckCircle else Icons.Default.Cancel,
+                contentDescription = null,
+                tint = if (task.isDone) Color(0xFF2E7D32) else Color(0xFFB71C1C),
+                modifier = Modifier.size(40.dp)
             )
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+// --- KOMPONENTY FORMULARZA ---
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TodoTaskInputForm(
+    item: TodoTaskForm,
+    modifier: Modifier = Modifier,
+    onValueChange: (TodoTaskForm) -> Unit = {},
+    enabled: Boolean = true
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Tytuł zadania", style = MaterialTheme.typography.labelLarge)
+        TextField(
+            value = item.title,
+            onValueChange = { onValueChange(item.copy(title = it)) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled
+        )
+
+        val datePickerState = rememberDatePickerState(
+            initialDisplayMode = DisplayMode.Picker,
+            yearRange = IntRange(2020, 2030),
+            initialSelectedDateMillis = item.deadline,
+        )
+        var showDialog by remember { mutableStateOf(false) }
+
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .clickable(enabled = enabled) { showDialog = true },
+            text = "Data: ${LocalDateConverter.fromMillis(item.deadline)}",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.secondary
+        )
+
+        if (showDialog) {
+            DatePickerDialog(
+                onDismissRequest = { showDialog = false },
+                confirmButton = {
+                    Button(onClick = {
+                        showDialog = false
+                        onValueChange(item.copy(deadline = datePickerState.selectedDateMillis!!))
+                    }) { Text("Wybierz") }
+                }
             ) {
-                Icon(
-                    imageVector = if (item.isDone) Icons.Default.CheckCircle else Icons.Default.Cancel,
-                    contentDescription = null,
-                    tint = if (item.isDone) Color(0xFF2E7D32) else Color(0xFFB71C1C),
-                    modifier = Modifier.size(64.dp)
-                )
+                DatePicker(state = datePickerState, showModeToggle = true)
+            }
+        }
+
+        // Dodatkowe pola: Status i Priorytet
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(checked = item.isDone, onCheckedChange = { onValueChange(item.copy(isDone = it)) })
+            Text("Ukończone")
+        }
+
+        Text("Priorytet", style = MaterialTheme.typography.labelLarge)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Priority.entries.forEach { p ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = (item.priority == p.name),
+                        onClick = { onValueChange(item.copy(priority = p.name)) }
+                    )
+                    Text(p.name)
+                }
             }
         }
     }
 }
 
 @Composable
-fun ListScreen(navController: NavController) {
+fun TodoTaskInputBody(
+    todoUiState: TodoTaskUiState,
+    onItemValueChange: (TodoTaskForm) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        TodoTaskInputForm(
+            item = todoUiState.todoTask,
+            onValueChange = onItemValueChange,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+// --- EKRANY ---
+
+@Composable
+fun ListScreen(
+    navController: NavController,
+    viewModel: ListViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    val listUiState by viewModel.listUiState.collectAsState()
+
     Scaffold(
+        topBar = { AppTopBar(navController, "Lista zadań", false, "form") },
         floatingActionButton = {
-            FloatingActionButton(
-                shape = CircleShape,
-                content = {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "Add task",
-                        modifier = Modifier.scale(1.5f)
-                    )
-                },
-                onClick = {
-                    navController.navigate("form")
-                }
-            )
-        },
-        topBar = {
-            AppTopBar(
-                navController = navController,
-                title = "List",
-                showBackIcon = false,
-                route = "form"
-            )
-        },
-        content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                items(items = todoTasks()) { item ->
-                    ListItem(item = item)
-                }
+            FloatingActionButton(shape = CircleShape, onClick = { navController.navigate("form") }) {
+                Icon(Icons.Filled.Add, contentDescription = "Add", modifier = Modifier.scale(1.5f))
             }
         }
-    )
+    ) { padding ->
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
+            items(items = listUiState.items, key = { it.id }) { task ->
+                TaskCard(task = task)
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FormScreen(navController: NavController) {
-    var title by remember { mutableStateOf("") }
-    var deadline by remember { mutableStateOf(LocalDate.now()) }
-    var isDone by remember { mutableStateOf(false) }
-    var priority by remember { mutableStateOf(Priority.Medium) }
-
-    var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = deadline.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-    )
-
-    if (showDatePicker) {
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let {
-                        deadline = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
-                    }
-                    showDatePicker = false
-                }) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("Anuluj")
-                }
-            }
-        ) {
-            DatePicker(state = datePickerState)
-        }
-    }
+fun FormScreen(
+    navController: NavController,
+    viewModel: FormViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
             AppTopBar(
                 navController = navController,
-                title = "Dodaj zadanie",
+                title = "Nowe zadanie",
                 showBackIcon = true,
-                route = "list"
-            )
-        },
-        content = { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .padding(16.dp)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = "Nowe zadanie",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Tytuł zadania") },
-                    modifier = Modifier.fillMaxWidth(),
-                    leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) }
-                )
-
-                OutlinedTextField(
-                    value = deadline.toString(),
-                    onValueChange = { },
-                    label = { Text("Termin (Deadline)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    readOnly = true,
-                    trailingIcon = {
-                        IconButton(onClick = { showDatePicker = true }) {
-                            Icon(imageVector = Icons.Default.DateRange, contentDescription = "Wybierz datę")
-                        }
-                    }
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(checked = isDone, onCheckedChange = { isDone = it })
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Zadanie ukończone")
-                }
-
-                HorizontalDivider()
-
-                Text("Priorytet", style = MaterialTheme.typography.labelLarge)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Priority.values().forEach { p ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(
-                                selected = (priority == p),
-                                onClick = { priority = p }
-                            )
-                            Text(
-                                text = when(p) {
-                                    Priority.High -> "Wysoki"
-                                    Priority.Medium -> "Średni"
-                                    Priority.Low -> "Niski"
-                                },
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Button(
-                    onClick = {
-                        println("Zapisano zadanie: $title, data: $deadline, status: $isDone, priorytet: $priority")
+                route = "list",
+                onSaveClick = {
+                    coroutineScope.launch {
+                        viewModel.save()
                         navController.navigate("list")
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Icon(Icons.Default.Check, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Zapisz zadanie")
+                    }
                 }
-            }
+            )
         }
-    )
+    ) { innerPadding ->
+        TodoTaskInputBody(
+            todoUiState = viewModel.todoTaskUiState,
+            onItemValueChange = viewModel::updateUiState,
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
 }
 
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "list") {
-        composable("list") { ListScreen(navController = navController) }
-        composable("form") { FormScreen(navController = navController) }
+        composable("list") { ListScreen(navController) }
+        composable("form") { FormScreen(navController) }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun MainScreenPreview() {
-    Lab06Theme {
-        MainScreen()
-    }
+    Lab06Theme { MainScreen() }
 }

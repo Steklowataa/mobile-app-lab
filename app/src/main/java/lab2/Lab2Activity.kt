@@ -1,12 +1,13 @@
-package lab2
+package pl.oleksandra.pam.lab2
+
 
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import lab3.Lab03Activity
-import pl.wsei.pam.lab01.R
+import pl.oleksandra.pam.lab3.Lab03Activity
 import android.content.Intent
+import pl.oleksandra.pam.lab06.R
 
 class Lab2Activity : AppCompatActivity() {
 

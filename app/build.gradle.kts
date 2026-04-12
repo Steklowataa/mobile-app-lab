@@ -1,14 +1,15 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp") version "1.9.20-1.0.14"
 }
 
 android {
-    namespace = "pl.wsei.pam.lab01"
+    namespace = "pl.oleksandra.pam.lab06"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "pl.wsei.pam.lab01"
+        applicationId = "pl.oleksandra.pam.lab06"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -47,8 +48,13 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.core:core-animation:1.0.0")
+    implementation("com.google.android.datatransport:transport-api:4.1.0")
 
     val composeBom = platform("androidx.compose:compose-bom:2024.02.01")
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
     implementation(composeBom)
     androidTestImplementation(composeBom)
 
