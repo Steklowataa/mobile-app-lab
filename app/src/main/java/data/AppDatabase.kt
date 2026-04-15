@@ -1,10 +1,10 @@
-package pl.wsei.pam.lab06.data
+package pl.oleksandra.pam.lab06.data
 
 import android.content.Context
 import androidx.room.*
-import pl.wsei.pam.lab06.data.TodoTaskEntity
-import pl.wsei.pam.lab06.data.TodoTaskDao
-import pl.wsei.pam.lab06.data.LocalDateConverter
+import pl.oleksandra.pam.lab06.data.TodoTaskEntity
+import pl.oleksandra.pam.lab06.data.TodoTaskDao
+import pl.oleksandra.pam.lab06.data.LocalDateConverter
 
 @Database(entities = [TodoTaskEntity::class], version = 1)
 @TypeConverters(LocalDateConverter::class)

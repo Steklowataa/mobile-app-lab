@@ -1,8 +1,8 @@
-package pl.wsei.pam.lab06.data
+package pl.oleksandra.pam.lab06.data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import pl.wsei.pam.lab06.TodoTask
+import pl.oleksandra.pam.lab06.TodoTask
 
 interface TodoTaskRepository {
     fun getAllAsStream(): Flow<List<TodoTask>>

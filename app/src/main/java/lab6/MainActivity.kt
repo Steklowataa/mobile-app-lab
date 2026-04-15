@@ -1,4 +1,4 @@
-package pl.wsei.pam.lab06
+package pl.oleksandra.pam.lab06
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -27,8 +27,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
-import pl.wsei.pam.lab06.data.*
+import pl.oleksandra.pam.lab06.data.*
 import java.time.LocalDate
+import pl.oleksandra.pam.lab06.data.LocalDateConverter
 
 // --- MODELE ---
 
@@ -95,6 +96,16 @@ fun AppTopBar(
                     Text(text = "Zapisz", fontSize = 18.sp)
                 }
             } else {
+                IconButton(onClick = {
+
+                    val notificationHandler = (navController.context.applicationContext as TodoApplication).container.notificationHandler
+                    notificationHandler.showSimpleNotification()
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Wyślij powiadomienie"
+                    )
+                }
                 IconButton(onClick = { }) { Icon(Icons.Default.Settings, "") }
                 IconButton(onClick = { }) { Icon(Icons.Default.Home, "") }
             }

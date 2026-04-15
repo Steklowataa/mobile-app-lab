@@ -1,4 +1,4 @@
-package pl.wsei.pam.lab06.data
+package pl.oleksandra.pam.lab06.data
 
 import androidx.room.TypeConverter
 import java.time.Instant

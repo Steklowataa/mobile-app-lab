@@ -1,11 +1,11 @@
-package pl.wsei.pam.lab06.data
+package pl.oleksandra.pam.lab06.data
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import pl.wsei.pam.lab06.Priority
-import pl.wsei.pam.lab06.TodoTask
+import pl.oleksandra.pam.lab06.Priority
+import pl.oleksandra.pam.lab06.TodoTask
 import java.time.LocalDate
 
 class FormViewModel(private val repository: TodoTaskRepository) : ViewModel() {

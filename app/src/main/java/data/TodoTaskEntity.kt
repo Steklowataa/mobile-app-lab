@@ -1,9 +1,9 @@
-package pl.wsei.pam.lab06.data
+package pl.oleksandra.pam.lab06.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import pl.wsei.pam.lab06.Priority
-import pl.wsei.pam.lab06.TodoTask
+import pl.oleksandra.pam.lab06.Priority
+import pl.oleksandra.pam.lab06.TodoTask
 import java.time.LocalDate
 
 @Entity(tableName = "tasks")

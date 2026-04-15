@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import pl.wsei.pam.lab06.Priority
+import pl.oleksandra.pam.lab06.Priority
 
 @Composable
 fun PrioritySelector(

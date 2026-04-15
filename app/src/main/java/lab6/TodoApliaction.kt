@@ -1,16 +1,15 @@
-package pl.wsei.pam.lab06
+package pl.oleksandra.pam.lab06 // Upewnij się, że to pasuje do Twojego Manifestu
 
 import android.app.Application
-import pl.wsei.pam.lab06.data.AppContainer
-import pl.wsei.pam.lab06.data.AppDataContainer
-class TodoApplication : Application() {
+import pl.oleksandra.pam.lab06.data.AppContainer
+import pl.oleksandra.pam.lab06.data.AppDataContainer
 
-    // Lateinit oznacza, że zainicjalizujemy to w onCreate
+class TodoApplication : Application() {
     lateinit var container: AppContainer
 
     override fun onCreate() {
         super.onCreate()
-        // Tworzymy kontener i przekazujemy mu kontekst całej aplikacji
+        // To jest najważniejsza linia!
         container = AppDataContainer(this)
     }
 }

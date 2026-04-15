@@ -6,8 +6,14 @@ plugins {
 
 android {
     namespace = "pl.oleksandra.pam.lab06"
-    compileSdk = 34
+    compileSdk = 35
 
+    packaging {
+        jniLibs {
+            // Ta flaga naprawia błąd kompatybilności z 16 KB
+            useLegacyPackaging = true
+        }
+    }
     defaultConfig {
         applicationId = "pl.oleksandra.pam.lab06"
         minSdk = 26
@@ -43,12 +49,14 @@ android {
 }
 
 dependencies {
+    // Zmieniono wersję na 1.12.0, która nie wymaga nowszego AGP
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.core:core-animation:1.0.0")
     implementation("com.google.android.datatransport:transport-api:4.1.0")
+    implementation(libs.google.accompanist.permissions)
 
     val composeBom = platform("androidx.compose:compose-bom:2024.02.01")
     val room_version = "2.6.1"

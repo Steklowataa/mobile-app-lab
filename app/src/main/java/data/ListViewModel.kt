@@ -1,4 +1,4 @@
-package pl.wsei.pam.lab06.data
+package pl.oleksandra.pam.lab06.data
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import pl.wsei.pam.lab06.TodoTask
+import pl.oleksandra.pam.lab06.TodoTask
 
 // Klasa przechowująca stan UI - domyślnie pusta lista
 data class ListUiState(val items: List<TodoTask> = listOf())
